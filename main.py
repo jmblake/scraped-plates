@@ -71,7 +71,7 @@ filter_query_suffix = "/".join(filters)
 url = f"{url_base}/en/{location_string}/restaurants/{filter_query_suffix}"
 
 
-def get_number_pages(url_with_filter: str) -> int:
+def get_number_of_pages(url_with_filter: str) -> int:
     page: requests.Response = requests.get(url_with_filter)
     tree: html.HtmlElement = html.fromstring(page.content)
     # The -2'th element gives us the last element in the list of pagination
@@ -82,7 +82,7 @@ def get_number_pages(url_with_filter: str) -> int:
         .xpath("/html/body/main/section[1]/div[1]/div/div[4]/div/ul")[0][-2]
         .find("a")
         .text
-    )  # TODO: Error handling for None case
+    )
     return num_pages
 
 
@@ -102,17 +102,15 @@ def collect_restaurant_elements(max_pages: int) -> list[html.HtmlElement]:
             results_html
             .find_class("js-restaurant__list_item")
         )
-        # results_html.find_class("card__menu-footer d-flex")
         restaurant_elements.extend(restaurant_elements_on_page)
     return restaurant_elements
 
 
 def main():
-    max_pages = get_number_pages(url)
+    max_pages = get_number_of_pages(url)
     restaurant_xml_elements = collect_restaurant_elements(max_pages)
-    restaurants = [Restaurant.from_restaurant_page_items(item)for item in
+    restaurants = [Restaurant.from_restaurant_page_items(item) for item in
                    restaurant_xml_elements]
-
 
 
 if __name__ == '__main__':
